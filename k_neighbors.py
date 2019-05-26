@@ -15,7 +15,7 @@ def normalizar(X):
     
     for i in range(m):
         for j in range(n):
-            X_norm[i][j] = (X[i][j] - mu[j])/sigma[j]
+            X_norm[i][j] = (X[i][j] - mu[j])/(sigma[j] + 0.000000001)
         
     return X_norm, mu, sigma
 
@@ -33,15 +33,18 @@ def distancia(x, X):
 
 def knn(x, X, Y, K):
     
+    X, mu, sigma = normalizar(X)
+    
     y = 0 
+    
     ind_viz = np.ones(K, dtype=int)
-
+    
     D = distancia(x, X)
     
     votos = np.zeros(len(set(Y)))
 
     ind_viz = np.argsort(D)[:K]
-        
+            
     for indice in ind_viz:
         votos[Y[indice]] += 1    
             
