@@ -99,10 +99,10 @@ def redes_neurais (Xtrain, Ytrain,Xval,Yval):
     epsilon_init = 0.12
     
     # carregando os pesos da camada 1
-    Theta1 =  np.random.RandomState(10).rand(hidden_layer_size, 1 + input_layer_size) * 2 * epsilon_init - epsilon_init
+    Theta1 =  np.random.rand(hidden_layer_size, 1 + input_layer_size) * 2 * epsilon_init - epsilon_init
     
     # carregando os pesos da camada 2
-    Theta2 = np.random.RandomState(20).rand(num_labels, 1 + hidden_layer_size) * 2 * epsilon_init - epsilon_init
+    Theta2 = np.random.rand(num_labels, 1 + hidden_layer_size) * 2 * epsilon_init - epsilon_init
     
     # concatena os pesos em um único vetor
     initial_rna_params = np.concatenate([np.ravel(Theta1), np.ravel(Theta2)])

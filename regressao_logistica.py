@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import scipy.optimize
 
 def sigmoid(z) :
 
@@ -50,5 +51,27 @@ def predicao(theta, X) :
     p = (prob >= 0.5).astype(int) 
 
     return p
+
+def regressao_logistica(Xtrain, Ytrain,Xval,Yval) :
+
+    # Configura se a função custo utiliza a regularização
+    reg = 0
+    # Configura o parametro de regularizacao lambda igual a 1
+    lambda_reg = 1
+    # Algumas configuracoes do gradiente descente
+    iteracoes = 50
+    theta = np.zeros(Xval.shape[1]) # Inicializa parâmetros que serao ajustados
+
+    # minimiza a funcao de custo
+    result = scipy.optimize.minimize(fun=funcaoCusto, x0=theta, args=(Xtrain, Ytrain,reg,lambda_reg),  
+                    method='BFGS', jac=True, options={'maxiter': iteracoes, 'disp':True})
+    # coleta os thetas retornados pela função de minimização
+    theta = result.x
+
+    # realiza a predição dos dados
+    p = predicao(theta, Xval)
+
+    acuracia = np.mean(p == Yval) * 100
+    print("Acuracia sem chi-squared é " + str(acuracia)) 
 
 
