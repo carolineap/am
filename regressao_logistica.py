@@ -72,6 +72,6 @@ def regressao_logistica(Xtrain, Ytrain,Xval,Yval) :
     p = predicao(theta, Xval)
 
     acuracia = np.mean(p == Yval) * 100
-    print("Acuracia sem chi-squared é " + str(acuracia)) 
-
+    
+    return acuracia
 

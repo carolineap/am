@@ -20,7 +20,7 @@ def normalizar(X):
     return X_norm, mu, sigma
 
 def distancia(x, X):
-   
+               
     m = X.shape[0] 
     D = np.zeros(m) 
 

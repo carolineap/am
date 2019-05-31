@@ -7,8 +7,11 @@ from nltk.stem import PorterStemmer
 import scipy.stats as stats
 from scipy.stats import chi2_contingency
 from nltk import FreqDist
+from nltk.util import ngrams # function for making ngrams
+from collections import Counter
 
-   
+NEGATION = ["not", "no", "nothing", "never", "none", "nobody"]
+
 def remove_not_alpha(words):
     
     only_alpha = [word.replace("'", "o") for word in words if word.isalpha() or (word == "n't")]
@@ -18,8 +21,8 @@ def remove_not_alpha(words):
 def remove_stop_words(words):
     
     stop_words = stopwords.words('english')
-    
-    without_sw = [word for word in words if word not in stop_words]
+        
+    without_sw = [word for word in words if word not in stop_words or word in NEGATION]
     
     return without_sw
 
@@ -30,32 +33,40 @@ def stemming(words):
     stemming_words = [ stemmer.stem(word) for word in words]
     
     return stemming_words
+
+def pos_tag(words):
+        
+    pt_words = []
+       
+    i = 0
     
-def get_frequency(words):
+    for token, pos in nltk.pos_tag(words):
+       
+        if pos[0] == 'V' or pos[0] == 'J' or pos[0] == 'R': #get only verbs, adverbs and adjectives
+            
+            pt_words.append(token)    
+          
+    return pt_words
     
-    bag = {}
-    
-    for word in words:
-        if word in bag:
-            bag[word] += 1
-        else:
-            bag[word] = 1
-    
-    return bag
 
 def clear_text(words):
-    return stemming(remove_stop_words(remove_not_alpha(words)))
     
-def chi_squared(X, Y, alpha=0.05):
+    return stemming(pos_tag(remove_stop_words(remove_not_alpha(words))))
+
+
+
+def handle_negation(words):
+           
+    with_negation = []
     
-    table = pd.crosstab(Y,X) 
-    
-    chi2, p, dof, expected = stats.chi2_contingency(table.values)
-   
-    if p < alpha:
-        return True
-    
-    return False
+    for i in range(len(words)):
+        
+        if words[i] in NEGATION and i+1 < len(words):
+            with_negation.append((words[i], words[i+1]))
+        else:
+            with_negation.append(words[i])
+            
+    return with_negation
 
 def bow(category):
            
@@ -76,6 +87,10 @@ def bow(category):
     bags = []
 
     vocabulary = []
+    
+    freq_bigrams = []
+    
+    bigrams = []
 
     for review in positive_reviews:
 
@@ -84,18 +99,22 @@ def bow(category):
         review_text = nltk.word_tokenize(review_text)
 
         review_text = clear_text(review_text)
+        
+        review_text = handle_negation(review_text)
 
+        vocabulary.extend(review_text)
+    
         bag = {}
-
+               
         for word in review_text:
             if word in bag:
                 bag[word] += 1
             else:
                 bag[word] = 1
-
+                
         bags.append(bag)
-
-
+                 
+          
     for review in negative_reviews:
 
         review_text = (review.find('title').string + review.find('review_text').string).lower()
@@ -103,7 +122,11 @@ def bow(category):
         review_text = nltk.word_tokenize(review_text)
 
         review_text = clear_text(review_text)
-
+        
+        review_text = handle_negation(review_text)
+             
+        vocabulary.extend(review_text)
+        
         bag = {}
 
         for word in review_text:
@@ -111,25 +134,83 @@ def bow(category):
                 bag[word] += 1
             else:
                 bag[word] = 1
-
+        
         bags.append(bag)
-
-    df = pd.DataFrame(data=bags) 
-    #df.dropna(axis=1, thresh=10, inplace=True)
-    df.fillna(0, inplace=True)
-
-    list = []
+        
+    n_reviews = n_pos_reviews + n_neg_reviews
+    
+    vocabulary = list(set(vocabulary))
+    
+    matrix = np.zeros((n_reviews, len(vocabulary)), dtype="int")
+      
+    for i in range(n_reviews):
+        for key in bags[i]:
+            index = vocabulary.index(key)
+            matrix[i][index] = bags[i][key]
+                
     classes = np.zeros((n_pos_reviews + n_neg_reviews), dtype="int")
     classes[:n_pos_reviews] = 1
-    for column in df.columns:
-        if chi_squared(df[column].values, classes):
-            list.append(column)
         
-    df_new = df[list]  
+    return matrix, classes, vocabulary
+
+
+def select_pd(X, Y, vocabulary, alpha=0.625):
     
-    return df, df_new, classes
+    selected = []
+    new_vocabulary = []
+    
+    positive = np.count_nonzero(X[Y == 1], axis=0)
+    negative = np.count_nonzero(X[Y == 0], axis=0)
+    
+    pd_features = abs(positive - negative)/(positive + negative)
+    
+    for i in range(len(pd_features)):
+        if pd_features[i] > alpha:
+            selected.append(i)
+            new_vocabulary.append(vocabulary[i])
+        
+    Xnew = X[:, selected]
+    
+    return Xnew, new_vocabulary
+
+def select_c2(X, Y, vocabulary):
+    
+    selected = []
+    new_vocabulary = []
+    
+    for i in range(len(vocabulary)):
+        if chi_squared(X[:, i], Y):
+            selected.append(i)
+            new_vocabulary.append(vocabulary[i])
+            
+    Xnew = X[:, selected]
+    
+    return Xnew, new_vocabulary
+
+def chi_squared(X, Y, alpha=0.2):
+    
+    table = pd.crosstab(Y,X) 
+    
+    chi2, p, dof, expected = stats.chi2_contingency(table.values)
+   
+    if p < alpha:
+        return True
+    
+    return False
+    
+
+def fp(X):
+    
+    return np.where(X > 0, 1, 0)
 
 
+def tf_idf(X):
+    
+    m, n = X.shape 
+    
+    return X * np.log(m/np.count_nonzero(X, axis=0))
+  
+        
 def stratified_holdOut(target, pTrain):
     
     train_index = []
