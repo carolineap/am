@@ -9,8 +9,9 @@ from scipy.stats import chi2_contingency
 from nltk import FreqDist
 from nltk.util import ngrams # function for making ngrams
 from collections import Counter
-
-NEGATION = ["not", "no", "nothing", "never", "none", "nobody"]
+from nltk.stem import WordNetLemmatizer 
+  
+NEGATION = ["not", "no", "nothing", "never", "none"]
 
 def remove_not_alpha(words):
     
@@ -34,6 +35,14 @@ def stemming(words):
     
     return stemming_words
 
+def lemmatization(words):
+    
+    lemmatizer = WordNetLemmatizer() 
+    
+    lemmatizer_words = [ lemmatizer.lemmatize(word) for word in words]
+    
+    return lemmatizer_words
+
 def pos_tag(words):
         
     pt_words = []
@@ -51,9 +60,7 @@ def pos_tag(words):
 
 def clear_text(words):
     
-    return stemming(pos_tag(remove_stop_words(remove_not_alpha(words))))
-
-
+    return stemming(lemmatization(pos_tag(remove_stop_words(remove_not_alpha(words)))))
 
 def handle_negation(words):
            
