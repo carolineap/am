@@ -49,18 +49,19 @@ def pos_tag(words):
        
     i = 0
     
+    adj = False
+    
     for token, pos in nltk.pos_tag(words):
-       
+        
         if pos[0] == 'V' or pos[0] == 'J' or pos[0] == 'R': #get only verbs, adverbs and adjectives
-            
-            pt_words.append(token)    
-          
+            pt_words.append(token)
+        
     return pt_words
     
 
 def clear_text(words):
     
-    return stemming(lemmatization(pos_tag(remove_stop_words(remove_not_alpha(words)))))
+    return stemming(pos_tag(remove_stop_words(remove_not_alpha(words))))
 
 def handle_negation(words):
            
@@ -70,6 +71,7 @@ def handle_negation(words):
         
         if words[i] in NEGATION and i+1 < len(words):
             with_negation.append((words[i], words[i+1]))
+            i += 1
         else:
             with_negation.append(words[i])
             
@@ -180,21 +182,36 @@ def select_pd(X, Y, vocabulary, alpha=0.625):
     
     return Xnew, new_vocabulary
 
-def select_c2(X, Y, vocabulary):
+def select_df(X, vocabulary, alpha):
+    
+    selected = []
+    new_vocabulary = []
+    
+    for i in range(X.shape[0]):
+        nzero = (np.count_nonzero(X[:, i])/X.shape[0])
+        if nzero > alpha:
+            selected.append(i)
+            new_vocabulary.append(vocabulary[i])
+    
+    Xnew = X[:, selected] 
+
+    return Xnew, new_vocabulary
+
+def select_c2(X, Y, vocabulary, alpha):
     
     selected = []
     new_vocabulary = []
     
     for i in range(len(vocabulary)):
-        if chi_squared(X[:, i], Y):
+        if chi_squared(X[:, i], Y, alpha):
             selected.append(i)
             new_vocabulary.append(vocabulary[i])
             
     Xnew = X[:, selected]
     
-    return Xnew, new_vocabulary
+    return Xnew, new_vocabulary, selected
 
-def chi_squared(X, Y, alpha=0.2):
+def chi_squared(X, Y, alpha):
     
     table = pd.crosstab(Y,X) 
     
@@ -217,21 +234,3 @@ def tf_idf(X):
     
     return X * np.log(m/np.count_nonzero(X, axis=0))
   
-        
-def stratified_holdOut(target, pTrain):
-    
-    train_index = []
-    test_index = []
-    
-    classes = np.unique(target)
-    i = []
-    for c in classes:
-        i, = np.where((target == c))
-        p = round(pTrain*len(i))
-        train_index.extend(i[:p])
-        test_index.extend(i[p:])    
-    
-    train_index.sort()
-    test_index.sort()    
-    
-    return train_index, test_index
