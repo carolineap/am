@@ -58,10 +58,26 @@ def pos_tag(words):
         
     return pt_words
     
+#modifiquei apenas para testar argumentos
+def clear_text(words, stem = True, pos_t = True, lemm = False, rm_stop = True, rm_not_alpha = True):
 
-def clear_text(words):
-    
-    return stemming(pos_tag(remove_stop_words(remove_not_alpha(words))))
+    if (rm_not_alpha):
+        words = remove_not_alpha(words)
+
+    if (rm_stop):
+        words = remove_stop_words (words)
+        
+    if (pos_t):
+        words = pos_tag (words)
+        
+    if (lemm):
+        words = lemmatization (words)
+        
+    if (stem):
+        words = stemming (words)
+        
+    return words
+         
 
 def handle_negation(words):
            
@@ -77,7 +93,8 @@ def handle_negation(words):
             
     return with_negation
 
-def bow(category):
+#modifiquei apenas para testar argumentos
+def bow(category, clear = True, stem = True, hand_neg = True, pos_t = True, lemm = False, rm_stop = True, rm_not_alpha = True):
            
     category += '/'
 
@@ -107,9 +124,12 @@ def bow(category):
 
         review_text = nltk.word_tokenize(review_text)
 
-        review_text = clear_text(review_text)
+        #clear_text recebe argumentos
+        if (clear):
+            review_text = clear_text(review_text, stem, pos_t, lemm, rm_stop, rm_not_alpha)
         
-        review_text = handle_negation(review_text)
+        if (hand_neg):
+            review_text = handle_negation(review_text)
 
         vocabulary.extend(review_text)
     
@@ -130,7 +150,9 @@ def bow(category):
 
         review_text = nltk.word_tokenize(review_text)
 
-        review_text = clear_text(review_text)
+        
+        if (clear_text):
+            review_text = clear_text(review_text)
         
         review_text = handle_negation(review_text)
              
