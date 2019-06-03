@@ -35,7 +35,7 @@ def funcaoCusto_backp(nn_params, input_layer_size, hidden_layer_size, num_labels
     #
     rotulos = np.zeros((len(y), num_labels), dtype=int) 
     for i in range(len(rotulos)):
-        rotulos[i][y[i] - 1] = 1
+        rotulos[i][y[i]] = 1
 
     a1 = np.insert(X, 0, np.ones(m, dtype=int), axis=1)
     z2 = np.dot(a1, Theta1.T)
@@ -86,7 +86,6 @@ def predicao(Theta1, Theta2, X):
     h2 = sigmoid( np.dot(a2,Theta2.T) )
     
     p = np.argmax(h2,axis=1)
-    p = p+1
     
     return p
 
