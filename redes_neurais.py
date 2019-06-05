@@ -2,26 +2,15 @@ import numpy as np
 import pandas as pd
 import scipy.optimize
 
-def sigmoid(z) :
-    z = 1/(1+np.exp(-z))
-
-    return z
 
 
-def sigmoidGradient(z):
 
-    g = np.zeros(z.shape)
 
-    g = sigmoid(z)*(1 - sigmoid(z))    
 
-    return g
 
-def funcaoCusto_backp(nn_params, input_layer_size, hidden_layer_size, num_labels, X, y, flagreg = False,lambda_reg = 1):
-    
-    # Extrai os parametros de nn_params e alimenta as variaveis Theta1 e Theta2.
-    Theta1 = np.reshape( nn_params[0:hidden_layer_size*(input_layer_size + 1)], (hidden_layer_size, input_layer_size+1) )
-    Theta2 = np.reshape( nn_params[ hidden_layer_size*(input_layer_size + 1):], (num_labels, hidden_layer_size+1) )
 
+
+<<<<<<< HEAD
     # Qtde de amostras
     m = X.shape[0]
          
@@ -127,3 +116,6 @@ def redes_neurais (Xtrain, Ytrain,Xval,Yval):
     
     return np.mean( pred == Yval ) 
     
+=======
+
+>>>>>>> c44560ec362353cae5da15c08f6c2a9d704dbc05

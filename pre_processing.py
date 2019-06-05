@@ -5,12 +5,14 @@ from bs4 import BeautifulSoup
 from nltk.corpus import stopwords 
 from nltk.stem import PorterStemmer 
 import scipy.stats as stats
-from scipy.stats import chi2_contingency
 from nltk import FreqDist
 from nltk.util import ngrams # function for making ngrams
 from collections import Counter
 from nltk.stem import WordNetLemmatizer 
-  
+from scipy.sparse import csr_matrix
+from scipy.sparse import issparse
+from scipy import special, stats
+
 NEGATION = ["not", "no", "nothing", "never", "none"]
 
 def remove_not_alpha(words):
@@ -35,15 +37,8 @@ def stemming(words):
     
     return stemming_words
 
-def lemmatization(words):
-    
-    lemmatizer = WordNetLemmatizer() 
-    
-    lemmatizer_words = [ lemmatizer.lemmatize(word) for word in words]
-    
-    return lemmatizer_words
 
-def pos_tag(words):
+def pos_tag(words, noun):
         
     pt_words = []
        
@@ -53,15 +48,27 @@ def pos_tag(words):
     
     for token, pos in nltk.pos_tag(words):
         
-        if pos[0] == 'V' or pos[0] == 'J' or pos[0] == 'R': #get only verbs, adverbs and adjectives
+        #if flag is true, get nouns
+        if noun and pos[0] == 'N':
+            pt_words.append(token)
+        
+        #get only verbs, adverbs and adjectives
+        if pos[0] == 'V' or pos[0] == 'J' or pos[0] == 'R': 
             pt_words.append(token)
         
     return pt_words
     
+#modifiquei apenas para testar argumentos
+def clear_text(words, noun):
+        
+    words = remove_not_alpha(words)
 
-def clear_text(words):
-    
-    return stemming(pos_tag(remove_stop_words(remove_not_alpha(words))))
+    words = remove_stop_words(words)
+
+    words = stemming(pos_tag(words, noun))
+        
+    return words
+         
 
 def handle_negation(words):
            
@@ -77,7 +84,7 @@ def handle_negation(words):
             
     return with_negation
 
-def bow(category):
+def bow(category, hNeg=True, noun=False):
            
     category += '/'
 
@@ -94,11 +101,7 @@ def bow(category):
     n_neg_reviews = len(negative_reviews)
 
     bags = []
-
-    vocabulary = []
-    
-    freq_bigrams = []
-    
+    vocabulary = []    
     bigrams = []
 
     for review in positive_reviews:
@@ -107,10 +110,8 @@ def bow(category):
 
         review_text = nltk.word_tokenize(review_text)
 
-        review_text = clear_text(review_text)
+        review_text = clear_text(review_text, noun)
         
-        review_text = handle_negation(review_text)
-
         vocabulary.extend(review_text)
     
         bag = {}
@@ -130,9 +131,10 @@ def bow(category):
 
         review_text = nltk.word_tokenize(review_text)
 
-        review_text = clear_text(review_text)
+        review_text = clear_text(review_text, noun)
         
-        review_text = handle_negation(review_text)
+        if hNeg:
+            review_text = handle_negation(review_text)
              
         vocabulary.extend(review_text)
         
@@ -148,83 +150,28 @@ def bow(category):
         
     n_reviews = n_pos_reviews + n_neg_reviews
     
+    #sort and get unique words
     vocabulary = list(set(vocabulary))
     
+    #generates matrix where m[i][j] is the number of times the word j appears in document i
     matrix = np.zeros((n_reviews, len(vocabulary)), dtype="int")
       
     for i in range(n_reviews):
         for key in bags[i]:
             index = vocabulary.index(key)
             matrix[i][index] = bags[i][key]
-                
-    classes = np.zeros((n_pos_reviews + n_neg_reviews), dtype="int")
-    classes[:n_pos_reviews] = 1
+    
+    #make target array
+    target = np.zeros((n_pos_reviews + n_neg_reviews), dtype="int")
+    target[:n_pos_reviews] = 1
+     
+    #transform matrix in a sparse matrix    
+    sMatrix = csr_matrix(matrix) 
         
-    return matrix, classes, vocabulary
+    return sMatrix, target, vocabulary
 
-
-def select_pd(X, Y, vocabulary, alpha=0.625):
-    
-    selected = []
-    new_vocabulary = []
-    
-    positive = np.count_nonzero(X[Y == 1], axis=0)
-    negative = np.count_nonzero(X[Y == 0], axis=0)
-    
-    pd_features = abs(positive - negative)/(positive + negative)
-    
-    for i in range(len(pd_features)):
-        if pd_features[i] > alpha:
-            selected.append(i)
-            new_vocabulary.append(vocabulary[i])
-        
-    Xnew = X[:, selected]
-    
-    return Xnew, new_vocabulary
-
-def select_df(X, vocabulary, alpha):
-    
-    selected = []
-    new_vocabulary = []
-    
-    for i in range(X.shape[0]):
-        nzero = (np.count_nonzero(X[:, i])/X.shape[0])
-        if nzero > alpha:
-            selected.append(i)
-            new_vocabulary.append(vocabulary[i])
-    
-    Xnew = X[:, selected] 
-
-    return Xnew, new_vocabulary
-
-def select_c2(X, Y, vocabulary, alpha):
-    
-    selected = []
-    new_vocabulary = []
-    
-    for i in range(len(vocabulary)):
-        if chi_squared(X[:, i], Y, alpha):
-            selected.append(i)
-            new_vocabulary.append(vocabulary[i])
-            
-    Xnew = X[:, selected]
-    
-    return Xnew, new_vocabulary, selected
-
-def chi_squared(X, Y, alpha):
-    
-    table = pd.crosstab(Y,X) 
-    
-    chi2, p, dof, expected = stats.chi2_contingency(table.values)
-   
-    if p < alpha:
-        return True
-    
-    return False
-    
 
 def fp(X):
-    
     return np.where(X > 0, 1, 0)
 
 
@@ -234,3 +181,60 @@ def tf_idf(X):
     
     return X * np.log(m/np.count_nonzero(X, axis=0))
   
+def chisquare(f_obs, f_exp):
+    
+    """
+    Fast replacement for scipy.stats.chisquare.
+    Version from https://github.com/scipy/scipy/pull/2525 with additional
+    optimizations.
+    
+    """
+    
+    f_obs = np.asarray(f_obs, dtype=np.float64)
+
+    k = len(f_obs)
+    
+    # Reuse f_obs for chi-squared statistics
+    chisq = f_obs
+    chisq -= f_exp
+    chisq **= 2
+    
+    with np.errstate(invalid="ignore"):
+        chisq /= f_exp
+        
+    chisq = chisq.sum(axis=0)
+    
+    pvalue = special.chdtrc(k - 1, chisq)
+    
+    return pvalue
+
+
+def chi2(X, y, vocabulary, alpha=0.01):
+    
+    """
+    Based on sklearn.feature_selection.chi2
+    
+    """
+    
+    Y = np.zeros((len(y), 2), dtype=int) 
+    for i in range(len(Y)):
+        Y[i][y[i]] = 1
+ 
+    observed = Y.T * X  # n_classes * n_features
+
+    feature_count = X.sum(axis=0).reshape(1, -1)
+    class_prob = Y.mean(axis=0).reshape(1, -1)
+    
+    expected = np.dot(class_prob.T, feature_count)
+
+    pvalue = chisquare(observed, expected)
+    
+    new_vocabulary = []
+    
+    index = [i for i in range(len(pvalue)) if pvalue[i] < alpha]
+    
+    new_vocabulary = [vocabulary[i] for i in index]
+    
+    Xnew = X[:, index]
+            
+    return Xnew, new_vocabulary, index
