@@ -92,3 +92,85 @@ def mediaFolds( resultados, classes ):
     print('\t%1.3f       %1.3f      %1.3f      Média micro\n' % (np.mean(revocacao_microAverage), np.mean(precisao_microAverage), np.mean(fmedida_microAverage)) )
 
     print('\tAcuracia: %1.3f' %np.mean(acuracia))
+
+def relatorioDesempenho(matriz_confusao, classes, imprimeRelatorio=False):
+   
+    n_teste = sum(sum(matriz_confusao))
+
+    nClasses = len( matriz_confusao ) #numero de classes
+
+    # inicializa as medidas que deverao ser calculadas
+    vp=np.zeros( nClasses ) # quantidade de verdadeiros positivos
+    vn=np.zeros( nClasses ) # quantidade de verdadeiros negativos
+    fp=np.zeros( nClasses ) # quantidade de falsos positivos
+    fn=np.zeros( nClasses ) # quantidade de falsos negativos
+   
+    acuracia = 0.0 
+
+    revocacao = np.zeros( nClasses ) # nesse vetor, devera ser guardada a revocacao para cada uma das classes
+    revocacao_macroAverage = 0.0
+    revocacao_microAverage = 0.0
+
+    precisao = np.zeros( nClasses ) # nesse vetor, devera ser guardada a revocacao para cada uma das classes
+    precisao_macroAverage = 0.0
+    precisao_microAverage = 0.0
+
+    fmedida = np.zeros( nClasses ) # nesse vetor, devera ser guardada a revocacao para cada uma das classes
+    fmedida_macroAverage = 0.0
+    fmedida_microAverage = 0.0
+
+    vp = matriz_confusao.diagonal()
+    fp = matriz_confusao.sum(axis=0) - vp
+    fn = matriz_confusao.sum(axis=1) - vp
+    vn = n_teste - vp - fp - fn
+    revocacao = vp/(vp + fn)
+    precisao = vp/(vp + fp)
+    acuracia = vp.sum()/n_teste
+    fmedida = 2*((precisao * revocacao)/(precisao + revocacao))
+    revocacao_macroAverage = revocacao.sum() * (1/nClasses)
+    precisao_macroAverage = precisao.sum() * (1/nClasses)
+    fmedida_macroAverage = 2 *((revocacao_macroAverage * precisao_macroAverage)/(revocacao_macroAverage + precisao_macroAverage))
+    revocacao_microAverage = vp.sum()/(vp + fn).sum()
+    precisao_microAverage = vp.sum()/(vp + fp).sum()
+    fmedida_microAverage = 2 *((revocacao_microAverage * precisao_microAverage)/(revocacao_microAverage + precisao_microAverage))
+
+    # imprimindo os resultados para cada classe
+    if imprimeRelatorio :
+
+        print('\n\tRevocacao   Precisao   F-medida   Classe')
+        for i in range(0,nClasses):
+            print('\t%1.3f       %1.3f      %1.3f      %s' % (revocacao[i], precisao[i], fmedida[i],classes[i] ) )
+
+        print('\t------------------------------------------------');
+
+        #imprime as médias
+        print('\t%1.3f       %1.3f      %1.3f      Média macro' % (revocacao_macroAverage, precisao_macroAverage, fmedida_macroAverage) )
+        print('\t%1.3f       %1.3f      %1.3f      Média micro\n' % (revocacao_microAverage, precisao_microAverage, fmedida_microAverage) )
+
+        print('\tAcuracia: %1.3f' %acuracia)
+
+
+    # guarda os resultados em uma estrutura tipo dicionario
+    resultados = {'revocacao': revocacao, 'acuracia': acuracia, 'precisao':precisao, 'fmedida':fmedida}
+    resultados.update({'revocacao_macroAverage':revocacao_macroAverage, 'precisao_macroAverage':precisao_macroAverage, 'fmedida_macroAverage':fmedida_macroAverage})
+    resultados.update({'revocacao_microAverage':revocacao_microAverage, 'precisao_microAverage':precisao_microAverage, 'fmedida_microAverage':fmedida_microAverage})
+    resultados.update({'confusionMatrix': matriz_confusao})
+
+    return resultados     
+
+def get_confusionMatrix(Y_test, Y_pred, classes):
+  
+    cm = np.zeros( [len(classes),len(classes)], dtype=int )
+#     for i in range(len(classes)) :
+#         for j in range(len(classes)) :
+#             indClasse = np.where(Y_test == classes[i])
+#             count = (Y_pred[indClasse] == classes[j]).sum()
+#             cm[i][j] = count
+#Os dois funcionam 
+    for i in range(len(classes)) :
+        for j in range(len(classes)) :
+            indClasse = np.where(Y_pred == classes[j])
+            count = (Y_test[indClasse] == classes[i]).sum()
+            cm[i][j] = count
+
+    return cm    
