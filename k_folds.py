@@ -81,6 +81,7 @@ def mediaFolds( resultados, classes ):
         precisao_microAverage[i] = resultados[i]['precisao_microAverage']
         fmedida_microAverage[i] = resultados[i]['fmedida_microAverage']
     # imprimindo os resultados para cada classe
+    print('\n-----------\nMedia-fold: \n-----------\n'  )
     print('\n\tRevocacao   Precisao   F-medida   Classe')
     for i in range(0,nClasses):
         print('\t%1.3f       %1.3f      %1.3f      %s' % (np.mean(revocacao[:,i]), np.mean(precisao[:,i]), np.mean(fmedida[:,i]), classes[i] ) )
