@@ -64,6 +64,15 @@ body{
     border-radius: 3px;
     width: 45%
 }
+/* -------------------Modal review type -------------------------*/
+.typeReview {
+    text-align: center;
+    vertical-align: middle;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* -------------------Loader -------------------------*/
 .cog1 {
     font-size:70px;
@@ -71,30 +80,55 @@ body{
     animation-name: spin2;
     animation-duration: 5000ms;
     animation-iteration-count: infinite;
-    animation-timing-function: linear; 
+    animation-timing-function: linear;
+   
   }
-  .cog2 {
+.cog2 {
     font-size:100px;
     animation-name: spin;
     animation-duration: 5000ms;
     animation-iteration-count: infinite;
     animation-timing-function: linear; 
-  }
+}
   
-  @keyframes spin {
-      from {
-          transform:rotate(0deg);
-      }
-      to {
-          transform:rotate(-360deg);
-      }
-  }
-  @keyframes spin2 {
-      from {
-          transform:rotate(0deg);
-      }
-      to {
-          transform:rotate(360deg);
-      }
-  }
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(-360deg);
+    }
+}
+@keyframes spin2 {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+}
 
+#loading {
+    opacity: 0.7;
+}
+/* -------------------Footer-------------------------*/
+.myfooter{
+    background-color: rgb(131, 183, 224);
+    color: #E0E0E0;
+    padding: 10px 20px 0 20px;
+    margin-bottom: 0%;
+    margin: 0%;
+    min-width: 100%
+}
+.myfooter p{
+    font-size: 11px;   
+}
+
+#ufscarFooter{
+    text-align: center; 
+    background-color: rgb(105, 161, 207);
+    padding: 0 20px 10px 20px;
+}
+.links{
+    font-size: 11px;
+}
