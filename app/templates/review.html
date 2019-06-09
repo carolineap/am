@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-
 	<head>
 		<title>Review Classifier</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-          <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-          <link href="https://fonts.googleapis.com/css?family=Karla&display=swap" rel="stylesheet"> 
-					<link rel="stylesheet" href="main.css">
-					<script language="javascript" type="text/javascript">
-            $(window).onload(function() {
-               onclick="$('#loading').show();"
-
-            });
-        </script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+		<script src="main.js"></script>
+		<link href="https://fonts.googleapis.com/css?family=Karla&display=swap" rel="stylesheet"> 
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="main.css">
 	</head>
 
 	<body>
@@ -29,16 +24,16 @@
 		</nav>
 		<div id="intro">
 			<h2>Sentiment Analysis Reviews Amazon</h2>
-			 </div>
+		</div>
 		
-		<form name='form' method="post" class="form-group">
+		<form id="mainForm" name='form' method="post" class="form-group">
 			<div class="row formContainer">
 				<div class="col-sm-3"></div>
 				<div class="col-sm-6" id="form1">
 					<label>Review Title</label>
-					<input name="reviewTitle" type="text" id="reviewTitle">
+					<input name="reviewTitle" type="text" id="reviewTitle" placeholder="Not required field">
 					<label>Review</label>
-					<textarea id="review" name="review" required></textarea>
+					<textarea id="review" name="review" required placeholder="Review Required field"></textarea>
 				</div>
 				<div class="col-sm-3"></div>
 			</div>
@@ -54,26 +49,73 @@
 							<option value="kitchen_&_housewares">Kitchen & Housewares</option>
 					</select>
 				</div>
-				<div class="col-sm-3"></div>
-				
+				<div class="col-sm-3"></div>		
 			</div>
 			<div class="row formContainer">
 					<div class="col-sm-3"></div>
 					<div class="col-sm-6" id="form3">
-							<button type="submit" class="myBtn" onclick="$('#loading').show();">Submit</button>
+							<button type="button" class="myBtn"
+							data-toggle="modal" data-target="#exampleModal">Submit</button>
 							<button type="reset" class="myBtn" style="background-color: #FBC02D">Clear</button>
 					</div>
 					<div class="col-sm-3"></div>
 				</div>
 		</form>	
-		<div id="loading" style="display: none">
-			<i class='fa fa-cog cog1'></i>
-			<i class='fa fa-cog cog2'></i>
-	</div>
-			
-
-			{{ classe }}
-
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+			  <div class="modal-content modalBody">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				<h3 class="modal-title" id="exampleModalLabel">The Review is:</h3>
+			  </div>	
+				<div class="modal-body">
+					<div id="loading" class="typeReview">
+							<i class='fa fa-cog cog1'></i>
+							<i class='fa fa-cog cog2'></i>
+							<h5>Our interns are working on it</h5>
+						</div>
+					<div class="typeReview">
+						<img src="imagens/good-review.png" width="100">
+						<h4>Positive</h4>
+					</div>
+					<div class="typeReview">
+						<img src="imagens/bad-review.png" width="100">
+						<h4>Negative</h4>
+					</div>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		  
+		<footer class="page-footer font-small " style="vertical-align: bottom;">
+			<div class="container text-left text-md-left myfooter row">
+				<div class="col-md-4"><h6>Developy by:</h6>
+					<p>Caroline Aparecida de Paula Silva <br>Isabela Sayuri Matsumoto<br>
+					Victor Watanabe<br>Antonio Jorge</p></div>
+					<div class="col-md-4 links">
+						<h6>Useful links:</h6>
+						<ul class="list-unstyled">
+								<li>
+									<a href="https://www.sorocaba.ufscar.br/">Ufscar Sorocaba</a>
+								</li>
+								<li>
+									<a href="http://lasid.sor.ufscar.br/sentminer/message.php">SentMiner</a>
+								</li>
+								<li>
+									<a href="https://dcomp.sor.ufscar.br/lasid/research/">LaSid</a>
+								</li>
+								<li>
+									<a href="http://lasid.sor.ufscar.br/expansion/static/index.html">Text Normalization and Expansion</a>
+								</li>
+								</ul>
+					</div>
+			</div>
+				<div id="ufscarFooter">
+					<p>2019. Universidade Federal de São Carlos - Campus Sorocaba</p>
+			</div>
+		</footer>	  
 	</body>
 
 </html>
