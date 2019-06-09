@@ -130,6 +130,8 @@
 	
 	$("#mainForm").submit(function(e) {
 
+		$("#modalPos").css("display", "none");
+		$("#modalNeg").css("display", "none");
 		$("#exampleModal").modal('show');
 		$("#loading").css("display", "block");
 
@@ -148,14 +150,14 @@
 				$("#modalPos").css("display", "none");
 				$("#modalNeg").css("display", "block");
 				$("#loading").css("display", "none");
-				$("#exampleModal").modal('show');
+				//$("#exampleModal").modal('show');
 
 			} else {
 
-				$("#modalPos").css("display", "block");
 				$("#modalNeg").css("display", "none");
+				$("#modalPos").css("display", "block");
 				$("#loading").css("display", "none");
-				$("#exampleModal").modal('show');
+				//$("#exampleModal").modal('show');
 			}
 
 

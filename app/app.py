@@ -28,7 +28,9 @@ def predicao(Theta1, Theta2, Xval):
 
     a2 = np.hstack( [np.ones([m,1]), h1] ) 
     h2 = sigmoid( np.dot(a2, Theta2.T) )
-    
+
+    print(h2)
+
     Ypred = np.argmax(h2,axis=1)
             
     return Ypred
