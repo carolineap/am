@@ -43,32 +43,36 @@ def review():
 
 		review_text = request.form.get('review')
 
-		# # #try:
+		# #try:
 			
-		# with open(category+'/vocabulary.txt', 'r') as in_file:
-		# 	vocabulary = in_file.read().split('\n')
+		with open('data/' + category +'/vocabulary.txt', 'r') as in_file:
+			vocabulary = in_file.read().split('\n')
 
-		# vocabulary = vocabulary[:-1] #remove last \n
+		vocabulary = vocabulary[:-1] #remove last \n
 
-		# for i in range(len(vocabulary)):
-		# 	if vocabulary[i][0] == "(" and vocabulary[i][-1] == ")":
-		# 		elements = vocabulary[i][1:-1].split(",")
-		# 		vocabulary[i] = tuple(elements)
+		for i in range(len(vocabulary)):
+			if vocabulary[i][0] == "(" and vocabulary[i][-1] == ")":
+				elements = vocabulary[i][1:-1].split(",")
+				vocabulary[i] = tuple(elements)
 
-		# Theta1 = np.load(category+'/Theta1.npy')
+		Theta1 = np.load('data/' + category+'/Theta1.npy')
 
-		# Theta2 = np.load(category+'/Theta2.npy')
+		Theta2 = np.load('data/' + category+'/Theta2.npy')
 
-		# sample = pp.bow(vocabulary, review_text)
+		sample = pp.bow(vocabulary, review_text)
 
-		# classe = predicao(Theta1, Theta2, np.asmatrix(sample))
+		classe = predicao(Theta1, Theta2, np.asmatrix(sample))
+
+		classe = classe[0][0]
+
+		print(int(classe))
 
 		# print("Classe = " + str(classe))
 
 		print("AAAAAAAAAAAAAAAAAAAA")
 
 
-		return render_template('review.html', answer=True, classe=0)
+		return render_template('review.html', answer=True, classe=int(classe))
 
 		# #except:
 

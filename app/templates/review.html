@@ -43,7 +43,7 @@
 					<label>Category:</label>
 					<select id="category" name="category">
 							<option value="all">All</option>
-							<option value="book">Books</option>
+							<option value="books">Books</option>
 							<option value="dvd">DVDs</option>
 							<option value="eletronics">Eletronics</option>
 							<option value="kitchen_&_housewares">Kitchen & Housewares</option>
@@ -60,6 +60,7 @@
 					<div class="col-sm-3"></div>
 				</div>
 		</form>	
+
 		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
 			<div class="modal-dialog" role="document">
 			  <div class="modal-content modalBody">
@@ -77,11 +78,14 @@
 							<i class='fa fa-cog cog1'></i>
 							<i class='fa fa-cog cog2'></i>
 							<h5>Our interns are working on it</h5>
+
+
 						</div>
 
 						{% endif %}
 
-					{% if answer and classe == 1 %}
+
+					{% if answer and classe == 0 %}
 					<div class="typeReview">
 						<img src="{{ url_for('static', filename='images/good-review.png') }}" width="100">
 						<h4>Positive</h4>
@@ -89,7 +93,7 @@
 					{% endif %}
 
 
-					{% if answer and classe == 0  %}
+					{% if answer and classe == 1 %}
 					<div class="typeReview">
 						<img src="{{ url_for('static', filename='images/good-review.png') }}" width="100">
 						<h4>Negative</h4>
@@ -132,9 +136,10 @@
 
 <script type="text/javascript">
 	
-	  $('#submitButton').on('submit', function(e){
-	      $('#exampleModal').modal('show');
-	      e.preventDefault();
+	  $('#submitButton').on('click', function(e){
+	  		$('#exampleModal').modal('show');	
+	  	  	$('#mainForm').submit();
+	      	e.preventDefault();
 	  });
 	
 
