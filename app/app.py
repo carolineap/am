@@ -1,7 +1,9 @@
 import numpy as np
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask import request
+import json
 import pp 
+from time import sleep
 
 app = Flask(__name__)
 
@@ -10,7 +12,6 @@ def sigmoid(z):
     """
     Calcula a função sigmoidal  
     """
-
     z = 1/(1+np.exp(-z))
     
     return z
@@ -32,18 +33,24 @@ def predicao(Theta1, Theta2, Xval):
             
     return Ypred
 
-
 @app.route('/', methods=['GET', 'POST'])
 def review():
+	return render_template('review.html')	
+
+
+@app.route('/request', methods=['GET', 'POST'])
+def request_review():
 
 	if request.method == 'POST':
-
 
 		category = request.form.get('category')
 
 		review_text = request.form.get('review')
 
-		# #try:
+		title = request.form.get('reviewTitle')
+
+		if title:
+			review_text += title
 			
 		with open('data/' + category +'/vocabulary.txt', 'r') as in_file:
 			vocabulary = in_file.read().split('\n')
@@ -67,19 +74,10 @@ def review():
 
 		print(int(classe))
 
-		# print("Classe = " + str(classe))
+		sleep(0.5)
 
-		print("AAAAAAAAAAAAAAAAAAAA")
+		return jsonify({'classe': int(classe)})
 
-
-		return render_template('review.html', answer=True, classe=int(classe))
-
-		# #except:
-
-		# #	pass
-
-		
-	return render_template('review.html', answer=False)	
 
 if __name__ == '__main__':
     app.run(debug=True)

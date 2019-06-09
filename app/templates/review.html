@@ -18,7 +18,7 @@
 			<div id = "container-navbar" class="container-fluid">
 				<div class="navbar-header">
 					<h4><img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" width="45">
-					 Machine Learnig </h4>
+					 Machine Learning </h4>
 				</div>
 			</div>
 		</nav>
@@ -54,7 +54,7 @@
 			<div class="row formContainer">
 					<div class="col-sm-3"></div>
 					<div class="col-sm-6" id="form3">
-							<button  id="submitButton"  type="button" class="myBtn">Submit</button>
+							<button  id="submitButton"  type="submit" class="myBtn">Submit</button>
 							<button type="reset" class="myBtn" style="background-color: #FBC02D">Clear</button>
 					</div>
 					<div class="col-sm-3"></div>
@@ -72,9 +72,8 @@
 			  </div>	
 				<div class="modal-body">
 						
-						{% if not answer %}
 
-						<div id="loading" class="typeReview">
+						<div id="loading" class="typeReview" style="display: none">
 							<i class='fa fa-cog cog1'></i>
 							<i class='fa fa-cog cog2'></i>
 							<h5>Our interns are working on it</h5>
@@ -82,32 +81,25 @@
 
 						</div>
 
-						{% endif %}
 
-
-					{% if answer and classe == 0 %}
-					<div class="typeReview">
+					<div id="modalPos" class="typeReview" style="display: none">
 						<img src="{{ url_for('static', filename='images/good-review.png') }}" width="100">
 						<h4>Positive</h4>
 					</div>
-					{% endif %}
 
-
-					{% if answer and classe == 1 %}
-					<div class="typeReview">
+					<div id = "modalNeg" class="typeReview" style="display: none"style="display: none">
 						<img src="{{ url_for('static', filename='images/good-review.png') }}" width="100">
 						<h4>Negative</h4>
 					</div>
-					{% endif %}
 
 				</div>
 			  </div>
 			</div>
 		  </div>
 		  
-		<footer class="page-footer font-small " style="vertical-align: bottom;">
+		<footer class="page-footer font-small " style="vertical-align: bottom; padding-top: 2%; padding-bottom: 0%;">
 			<div class="container text-left text-md-left myfooter row">
-				<div class="col-md-4"><h6>Developy by:</h6>
+				<div class="col-md-4"><h6>Developed by:</h6>
 					<p>Caroline Aparecida de Paula Silva <br>Isabela Sayuri Matsumoto<br>
 					Victor Watanabe<br>Antonio Jorge</p></div>
 					<div class="col-md-4 links">
@@ -129,18 +121,49 @@
 					</div>
 			</div>
 				<div id="ufscarFooter">
-					<p>2019. Universidade Federal de São Carlos - Campus Sorocaba</p>
+					<p><br>2019. Universidade Federal de São Carlos - Campus Sorocaba</p>
 			</div>
 		</footer>	  
 	</body>
 
 <script type="text/javascript">
 	
-	  $('#submitButton').on('click', function(e){
-	  		$('#exampleModal').modal('show');	
-	  	  	$('#mainForm').submit();
-	      	e.preventDefault();
-	  });
+	$("#mainForm").submit(function(e) {
+
+		$("#exampleModal").modal('show');
+		$("#loading").css("display", "block");
+
+    var form = $(this);
+
+    $.ajax({
+           type: "POST",
+           url: '/request',
+           data: form.serialize() // serializes the form's elements.
+         })
+
+		.done(function(data) {
+
+			if (data.classe == '0') {
+
+				$("#modalPos").css("display", "none");
+				$("#modalNeg").css("display", "block");
+				$("#loading").css("display", "none");
+				$("#exampleModal").modal('show');
+
+			} else {
+
+				$("#modalPos").css("display", "block");
+				$("#modalNeg").css("display", "none");
+				$("#loading").css("display", "none");
+				$("#exampleModal").modal('show');
+			}
+
+
+         });
+
+	e.preventDefault(); // avoid to execute the actual submit of the form.
+
+});
 	
 
 </script>
