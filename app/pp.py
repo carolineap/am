@@ -1,17 +1,12 @@
 import numpy as np
-import pandas as pd
 import nltk
 from nltk.corpus import stopwords 
 from nltk.stem import PorterStemmer 
-import scipy.stats as stats
-from nltk import FreqDist
 from nltk.util import ngrams # function for making ngrams
-from collections import Counter
-from nltk.stem import WordNetLemmatizer 
-from nltk.corpus import wordnet
 
 
-NEGATION = ["not", "no", "nothing", "never", "none"]
+
+NEGATION = ["not", "no", "nothing", "never"]
 
 def remove_not_alpha(words):
     
@@ -87,13 +82,11 @@ def handle_negation(words):
 
 def bow(vocabulary, review_text):
 
-	noun = False
+	noun = True
 	       
 	review_text = nltk.word_tokenize(review_text)
 	review_text = clear_text(review_text, noun)
 	review_text = handle_negation(review_text)
-
-	samples = []
 
 	sample = np.zeros(len(vocabulary), dtype="int")
 
@@ -102,6 +95,5 @@ def bow(vocabulary, review_text):
 			i = vocabulary.index(word)
 			sample[i] += 1
 
-	samples.append(sample)
 
-	return samples
+	return sample

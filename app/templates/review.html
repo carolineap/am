@@ -10,14 +10,14 @@
 		<script src="main.js"></script>
 		<link href="https://fonts.googleapis.com/css?family=Karla&display=swap" rel="stylesheet"> 
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-		<link rel="stylesheet" href="main.css">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 	</head>
 
 	<body>
 		<nav id = "nb" class="navbar navbar-default" >
 			<div id = "container-navbar" class="container-fluid">
 				<div class="navbar-header">
-					<h4><img src="imagens/logo.png" class="logo" width="45">
+					<h4><img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" width="45">
 					 Machine Learnig </h4>
 				</div>
 			</div>
@@ -54,14 +54,13 @@
 			<div class="row formContainer">
 					<div class="col-sm-3"></div>
 					<div class="col-sm-6" id="form3">
-							<button type="button" class="myBtn"
-							data-toggle="modal" data-target="#exampleModal">Submit</button>
+							<button  id="submitButton"  type="button" class="myBtn">Submit</button>
 							<button type="reset" class="myBtn" style="background-color: #FBC02D">Clear</button>
 					</div>
 					<div class="col-sm-3"></div>
 				</div>
 		</form>	
-		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
 			<div class="modal-dialog" role="document">
 			  <div class="modal-content modalBody">
 				<div class="modal-header">
@@ -71,19 +70,32 @@
 				<h3 class="modal-title" id="exampleModalLabel">The Review is:</h3>
 			  </div>	
 				<div class="modal-body">
-					<div id="loading" class="typeReview">
+						
+						{% if not answer %}
+
+						<div id="loading" class="typeReview">
 							<i class='fa fa-cog cog1'></i>
 							<i class='fa fa-cog cog2'></i>
 							<h5>Our interns are working on it</h5>
 						</div>
+
+						{% endif %}
+
+					{% if answer and classe == 1 %}
 					<div class="typeReview">
-						<img src="imagens/good-review.png" width="100">
+						<img src="{{ url_for('static', filename='images/good-review.png') }}" width="100">
 						<h4>Positive</h4>
 					</div>
+					{% endif %}
+
+
+					{% if answer and classe == 0  %}
 					<div class="typeReview">
-						<img src="imagens/bad-review.png" width="100">
+						<img src="{{ url_for('static', filename='images/good-review.png') }}" width="100">
 						<h4>Negative</h4>
 					</div>
+					{% endif %}
+
 				</div>
 			  </div>
 			</div>
@@ -117,5 +129,15 @@
 			</div>
 		</footer>	  
 	</body>
+
+<script type="text/javascript">
+	
+	  $('#submitButton').on('submit', function(e){
+	      $('#exampleModal').modal('show');
+	      e.preventDefault();
+	  });
+	
+
+</script>
 
 </html>
