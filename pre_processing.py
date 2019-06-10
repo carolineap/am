@@ -15,12 +15,14 @@ from scipy import special, stats
 
 NEGATION = ["not", "no", "nothing", "never", "none"]
 
+# Trata palavras com apostrofo
 def remove_not_alpha(words):
     
     only_alpha = [word.replace("'", "o") for word in words if word.isalpha() or (word == "n't")]
     
     return only_alpha
-    
+   
+# Remove palavras irrelevantes
 def remove_stop_words(words):
     
     stop_words = stopwords.words('english')
@@ -29,6 +31,7 @@ def remove_stop_words(words):
     
     return without_sw
 
+# Executa o algoritmo de stemming, removendo o sufixo das palavras
 def stemming(words):
     
     stemmer = PorterStemmer() 
@@ -37,7 +40,7 @@ def stemming(words):
     
     return stemming_words
 
-
+# funcao do nltk para 'tagging' de palavras individualmente
 def pos_tag(words, noun):
         
     pt_words = []
@@ -58,7 +61,7 @@ def pos_tag(words, noun):
         
     return pt_words
     
-#modifiquei apenas para testar argumentos
+# funcoes de tratamento    
 def clear_text(words, noun):
         
     words = remove_not_alpha(words)
@@ -69,7 +72,7 @@ def clear_text(words, noun):
         
     return words
          
-
+# trata palavras de negacao, as adicionando em bigramas com a proxima palavra
 def handle_negation(words):
            
     with_negation = []
@@ -84,84 +87,104 @@ def handle_negation(words):
             
     return with_negation
 
+# le uma base de dados do disco, trata e retorna uma matriz esparsa com as palavras, classes e o vocabulario
 def bow(category, hNeg=True, noun=False):
            
     category += '/'
 
+    # Carrega as reviews negativas e positivas
     positive = open('sorted_data_acl/' + category  + 'positive.review', 'r')
     negative = open('sorted_data_acl/' + category  + 'negative.review', 'r')
 
+    # Utiliza o BeautifulSoup para ler do xml
     positive_reviews = (BeautifulSoup(positive, 'lxml'))
     negative_reviews = (BeautifulSoup(negative, 'lxml'))
 
+    # Guarda apenas as reviews 
     positive_reviews = positive_reviews.find_all(['review'])
     negative_reviews = negative_reviews.find_all(['review'])
 
     n_pos_reviews = len(positive_reviews)
     n_neg_reviews = len(negative_reviews)
 
+    # Inicializa a bag of words, vocabulario e os bigramas
     bags = []
     vocabulary = []    
     bigrams = []
 
+    # Trata as reviews positivas
     for review in positive_reviews:
 
+        # Guarda apenas o titulo e o texto de cada review
         review_text = (review.find('title').string + review.find('review_text').string).lower()
 
+        # Tokenize
         review_text = nltk.word_tokenize(review_text)
 
+        # Chama a funcao que faz o tratamento dos dados
         review_text = clear_text(review_text, noun)
         
+        # Guarda as palavras no vocabulario
         vocabulary.extend(review_text)
     
         bag = {}
-               
+        
+        # Conta quantas ocorrencias de cada palavra
         for word in review_text:
             if word in bag:
                 bag[word] += 1
             else:
                 bag[word] = 1
-                
+        
+        # Guarda as ocorrencias de cada palavra
         bags.append(bag)
                  
           
     for review in negative_reviews:
 
+        # Guarda apenas o titulo e o texto de cada review
         review_text = (review.find('title').string + review.find('review_text').string).lower()
 
+        # Tokenize
         review_text = nltk.word_tokenize(review_text)
 
+        # Chama a funcao que faz o tratamento dos dados
         review_text = clear_text(review_text, noun)
         
+        # Chama a funcao para juntar negacoes em bigramas
         if hNeg:
             review_text = handle_negation(review_text)
              
+        # Guarda as palavras no vocabulario
         vocabulary.extend(review_text)
         
         bag = {}
 
+        # Conta quantas ocorrencias de cada palavra
         for word in review_text:
             if word in bag:
                 bag[word] += 1
             else:
                 bag[word] = 1
         
+        # Guarda as ocorrencias de cada palavra
         bags.append(bag)
         
     n_reviews = n_pos_reviews + n_neg_reviews
     
-    #sort and get unique words
+    # sort and get unique words
     vocabulary = list(set(vocabulary))
     
-    #generates matrix where m[i][j] is the number of times the word j appears in document i
+    # generates matrix where m[i][j] is the number of times the word j appears in document i
     matrix = np.zeros((n_reviews, len(vocabulary)), dtype="int")
       
+    # Organiza as 'bags of words' em features e salva na matriz com as colunas correspondentes
     for i in range(n_reviews):
         for key in bags[i]:
             index = vocabulary.index(key)
             matrix[i][index] = bags[i][key]
     
-    #make target array
+    # make target array
     target = np.zeros((n_pos_reviews + n_neg_reviews), dtype="int")
     target[:n_pos_reviews] = 1
      
@@ -208,7 +231,8 @@ def chisquare(f_obs, f_exp):
     
     return pvalue
 
-
+# Chi-quadrado para reducao de dimensionalidade
+# seleciona apenas as features mais relevantes, baseado num parametro alpha
 def chi2(X, y, vocabulary, alpha=0.05):
     
     """

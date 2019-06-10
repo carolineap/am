@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+# Calcula e retorna a matriz de confusão dada uma base de dados
 def get_confusionMatrix(Y_test, Y_pred, classes):
     
     cm = np.zeros( [len(classes),len(classes)], dtype=int )
@@ -9,11 +10,10 @@ def get_confusionMatrix(Y_test, Y_pred, classes):
             
     for exp, pred in zip(Y_test, Y_pred):
         cm[exp][pred] += 1
-        
                 
     return cm
 
-
+# Calcula e retorna um relatorio com as principais medidas
 def relatorioDesempenho(Yval, Ypred, classes, imprimeRelatorio=False):
     
     matriz_confusao = get_confusionMatrix(Yval, Ypred, classes)
@@ -87,7 +87,8 @@ def relatorioDesempenho(Yval, Ypred, classes, imprimeRelatorio=False):
 
     return resultados 
 
-
+# Faz o holdout estratificado, dado uma base e a porcentagem de treino
+# Retorna os indices de treino e teste, mantendo as proporcoes originais de cada classe
 def stratified_holdOut(target, pTrain):
     
     train_index = []
